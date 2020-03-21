@@ -24,6 +24,7 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
   String _userId = "";
+  bool showSlideshow = true;
 
   @override
   void initState() {
@@ -72,6 +73,9 @@ class _RootPageState extends State<RootPage> {
     if (authStatus == AuthStatus.LOGGED_IN) {
       return new MainPage(auth: widget.auth);
     } else if (authStatus == AuthStatus.NOT_LOGGED_IN) {
+      if(showSlideshow) {
+        return new IntroSlideShowPage(onFinish: () => setState(() => showSlideshow = false));
+      }
       return new LoginPage(auth: widget.auth, loginCallback: loginCallback);
     }
     return buildWaitingScreen();
