@@ -51,9 +51,7 @@ class _LoginPageState extends State<LoginPage> {
           //_showVerifyEmailSentDialog();
           print('Signed up user: $userId');
         }
-        setState(() {
-          _isLoading = false;
-        });
+
 
         if (userId.length > 0 && userId != null) {
           widget.loginCallback();

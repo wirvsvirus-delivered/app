@@ -5,9 +5,10 @@ import 'package:delivered/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
-  MainPage({this.auth});
+  MainPage({this.auth, this.logoutCallback});
 
   Auth auth;
+  Function logoutCallback;
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -16,7 +17,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    widget.auth.isAccountInfoCompleted().then((value) => log(value.toString()));
-    return RaisedButton(onPressed: () => widget.auth.signOut());
+    return RaisedButton(onPressed: () {
+      widget.auth.signOut();
+      widget.logoutCallback();
+    });
   }
 }

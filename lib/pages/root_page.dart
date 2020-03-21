@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:delivered/pages/account_completion_page.dart';
 import 'package:delivered/pages/login_page.dart';
 import 'package:delivered/pages/main_page.dart';
 import 'package:delivered/pages/slider_page.dart';
@@ -25,6 +26,7 @@ class _RootPageState extends State<RootPage> {
   AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
   String _userId = "";
   bool showSlideshow = true;
+  bool showAccountCompletion = false;
 
   @override
   void initState() {
@@ -55,8 +57,11 @@ class _RootPageState extends State<RootPage> {
         _userId = user.uid.toString();
       });
     });
-    setState(() {
-      authStatus = AuthStatus.LOGGED_IN;
+    widget.auth.isAccountInfoCompleted().then((value) {
+      setState(() {
+        showAccountCompletion = !value;
+        authStatus = AuthStatus.LOGGED_IN;
+      });
     });
   }
 
@@ -71,10 +76,14 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     log("UserId: " + _userId);
     if (authStatus == AuthStatus.LOGGED_IN) {
-      return new MainPage(auth: widget.auth);
+      if (showAccountCompletion) {
+        return AccountCompletionPage();
+      }
+      return new MainPage(auth: widget.auth, logoutCallback: logoutCallback);
     } else if (authStatus == AuthStatus.NOT_LOGGED_IN) {
-      if(showSlideshow) {
-        return new IntroSlideShowPage(onFinish: () => setState(() => showSlideshow = false));
+      if (showSlideshow) {
+        return new IntroSlideShowPage(
+            onFinish: () => setState(() => showSlideshow = false));
       }
       return new LoginPage(auth: widget.auth, loginCallback: loginCallback);
     }
