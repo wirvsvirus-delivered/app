@@ -1,17 +1,17 @@
 import 'package:delivered/services/auth.dart';
 import 'package:flutter/material.dart';
 
-class LoginSignupPage extends StatefulWidget {
-  LoginSignupPage({this.auth, this.loginCallback});
+class LoginPage extends StatefulWidget {
+  LoginPage({this.auth, this.loginCallback});
 
   final BaseAuth auth;
   final VoidCallback loginCallback;
 
   @override
-  State<StatefulWidget> createState() => new _LoginSignupPageState();
+  State<StatefulWidget> createState() => new _LoginPageState();
 }
 
-class _LoginSignupPageState extends State<LoginSignupPage> {
+class _LoginPageState extends State<LoginPage> {
   final _formKey = new GlobalKey<FormState>();
 
   String _email;
@@ -91,7 +91,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('Flutter login demo'),
+          title: new Text(_isLoginForm ? 'Anmelden' : 'Registrieren'),
         ),
         body: Stack(
           children: <Widget>[
@@ -178,7 +178,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
         child: CircleAvatar(
           backgroundColor: Colors.transparent,
           radius: 48.0,
-          child: Image.asset('assets/flutter-icon.png'),
+          child: Image.asset('assets/logo.png'),
         ),
       ),
     );
@@ -192,12 +192,12 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
         keyboardType: TextInputType.emailAddress,
         autofocus: false,
         decoration: new InputDecoration(
-            hintText: 'Email',
+            hintText: 'E-Mail',
             icon: new Icon(
               Icons.mail,
               color: Colors.grey,
             )),
-        validator: (value) => value.isEmpty ? 'Email can\'t be empty' : null,
+        validator: (value) => value.isEmpty ? 'E-Mail kann nicht lehr sein' : null,
         onSaved: (value) => _email = value.trim(),
       ),
     );
@@ -211,12 +211,12 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
         obscureText: true,
         autofocus: false,
         decoration: new InputDecoration(
-            hintText: 'Password',
+            hintText: 'Passwort',
             icon: new Icon(
               Icons.lock,
               color: Colors.grey,
             )),
-        validator: (value) => value.isEmpty ? 'Password can\'t be empty' : null,
+        validator: (value) => value.isEmpty ? 'Passwort kann nicht lehr sein' : null,
         onSaved: (value) => _password = value.trim(),
       ),
     );
@@ -225,7 +225,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   Widget showSecondaryButton() {
     return new FlatButton(
         child: new Text(
-            _isLoginForm ? 'Create an account' : 'Have an account? Sign in',
+            _isLoginForm ? 'Konto erstellen' : 'Du hast schon einen Konto? Anmelden',
             style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.w300)),
         onPressed: toggleFormMode);
   }
@@ -239,8 +239,8 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
             elevation: 5.0,
             shape: new RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(30.0)),
-            color: Colors.blue,
-            child: new Text(_isLoginForm ? 'Login' : 'Create account',
+            color: Theme.of(context).accentColor,
+            child: new Text(_isLoginForm ? 'Anmelden' : 'Registrieren',
                 style: new TextStyle(fontSize: 20.0, color: Colors.white)),
             onPressed: validateAndSubmit,
           ),

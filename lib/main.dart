@@ -1,4 +1,5 @@
 import 'package:delivered/pages/root_page.dart';
+import 'package:delivered/services/auth.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -23,8 +24,9 @@ class MyApp extends StatelessWidget {
             900: Color(0xffE5520B)
           }),
           accentColor: Color(0xffab1c48)),
-      darkTheme: ThemeData(brightness: Brightness.dark),
-      home: RootPage(title: 'delivered'),
+      darkTheme: ThemeData(
+          brightness: Brightness.dark, accentColor: Color(0xffab1c48)),
+      home: RootPage(auth: new Auth()),
     );
   }
 }
