@@ -1,5 +1,5 @@
 name: delivered
-description: A new Flutter project.
+description: 
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -21,6 +21,7 @@ dependencies:
     sdk: flutter
   firebase_core: ^0.4.0+9
   firebase_auth: ^0.14.0+5
+  cloud_firestore: ^0.13.4+2
   carousel_slider: ^1.3.0
 
   # The following adds the Cupertino Icons font to your application.

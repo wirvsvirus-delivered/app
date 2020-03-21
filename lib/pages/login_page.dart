@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:delivered/services/auth.dart';
+import 'package:delivered/utils/form_utils.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,7 +21,6 @@ class _LoginPageState extends State<LoginPage> {
   String _password;
   String _errorMessage;
 
-  bool _isLoginForm;
   bool _isLoading;
 
   // Check if form is valid before perform login or signup
@@ -32,15 +34,15 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Perform login or signup
-  void validateAndSubmit() async {
-    setState(() {
-      _errorMessage = "";
-      _isLoading = true;
-    });
+  void validateAndSubmit(bool isLogin) async {
     if (validateAndSave()) {
       String userId = "";
+      setState(() {
+        _errorMessage = "";
+        _isLoading = true;
+      });
       try {
-        if (_isLoginForm) {
+        if (isLogin) {
           userId = await widget.auth.signIn(_email, _password);
           print('Signed in: $userId');
         } else {
@@ -53,14 +55,14 @@ class _LoginPageState extends State<LoginPage> {
           _isLoading = false;
         });
 
-        if (userId.length > 0 && userId != null && _isLoginForm) {
+        if (userId.length > 0 && userId != null) {
           widget.loginCallback();
         }
       } catch (e) {
         print('Error: $e');
         setState(() {
           _isLoading = false;
-          _errorMessage = e.message;
+          _errorMessage = e.code;
           _formKey.currentState.reset();
         });
       }
@@ -71,44 +73,21 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     _errorMessage = "";
     _isLoading = false;
-    _isLoginForm = true;
     super.initState();
   }
 
   void resetForm() {
-    _formKey.currentState.reset();
+    // _formKey.currentState.reset();
     _errorMessage = "";
-  }
-
-  void toggleFormMode() {
-    resetForm();
-    setState(() {
-      _isLoginForm = !_isLoginForm;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text(_isLoginForm ? 'Anmelden' : 'Registrieren'),
+          title: new Text("Registrieren und Anmelden"),
         ),
-        body: Stack(
-          children: <Widget>[
-            _showForm(),
-            _showCircularProgress(),
-          ],
-        ));
-  }
-
-  Widget _showCircularProgress() {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-    return Container(
-      height: 0.0,
-      width: 0.0,
-    );
+        body: _showForm());
   }
 
 //  void _showVerifyEmailSentDialog() {
@@ -135,21 +114,28 @@ class _LoginPageState extends State<LoginPage> {
 //  }
 
   Widget _showForm() {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
     return new Container(
         padding: EdgeInsets.all(16.0),
         child: new Form(
           key: _formKey,
-          child: new ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              showLogo(),
-              showEmailInput(),
-              showPasswordInput(),
-              showPrimaryButton(),
-              showSecondaryButton(),
-              showErrorMessage(),
-            ],
-          ),
+          child: new ListView(shrinkWrap: true, children: <Widget>[
+            showLogo(),
+            showEmailInput(),
+            showPasswordInput(),
+            Padding(
+                padding: new EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 0.0),
+                child: Center(
+                  child: Row(children: <Widget>[
+                    buildButton(
+                        false, "Registrieren", () => validateAndSubmit(false)),
+                    buildButton(true, "Anmelden", () => validateAndSubmit(true))
+                  ]),
+                )),
+            showErrorMessage()
+          ]),
         ));
   }
 
@@ -185,65 +171,33 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget showEmailInput() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0),
-      child: new TextFormField(
-        maxLines: 1,
-        keyboardType: TextInputType.emailAddress,
-        autofocus: false,
-        decoration: new InputDecoration(
-            hintText: 'E-Mail',
-            icon: new Icon(
-              Icons.mail,
-              color: Colors.grey,
-            )),
-        validator: (value) => value.isEmpty ? 'E-Mail kann nicht lehr sein' : null,
-        onSaved: (value) => _email = value.trim(),
-      ),
-    );
+    return FormUtils.buildFormField(
+        InputType.EMAIL,
+        'E-Mail',
+        Icons.mail,
+        (value) => value.isEmpty ? 'E-Mail kann nicht lehr sein' : null,
+        (value) => _email = value.trim(),
+        100);
   }
 
   Widget showPasswordInput() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 0.0),
-      child: new TextFormField(
-        maxLines: 1,
-        obscureText: true,
-        autofocus: false,
-        decoration: new InputDecoration(
-            hintText: 'Passwort',
-            icon: new Icon(
-              Icons.lock,
-              color: Colors.grey,
-            )),
-        validator: (value) => value.isEmpty ? 'Passwort kann nicht lehr sein' : null,
-        onSaved: (value) => _password = value.trim(),
+    return FormUtils.buildFormField(InputType.PASSWORD, 'Passwort', Icons.lock, (value) {
+      if (value.isEmpty) {
+        return 'Passwort kann nicht lehr sein';
+      } else if(value.toString().length < 6) {
+        return 'Passwort zu kurz';
+      }
+      return null;
+    }, (value) => _password = value.trim(), 15);
+  }
+
+  Widget buildButton(bool primary, String text, Function onPress) {
+    return Expanded(
+      child: FlatButton(
+        color: primary ? Theme.of(context).accentColor : null,
+        child: new Text(text, style: Theme.of(context).textTheme.button),
+        onPressed: onPress,
       ),
     );
-  }
-
-  Widget showSecondaryButton() {
-    return new FlatButton(
-        child: new Text(
-            _isLoginForm ? 'Konto erstellen' : 'Du hast schon einen Konto? Anmelden',
-            style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.w300)),
-        onPressed: toggleFormMode);
-  }
-
-  Widget showPrimaryButton() {
-    return new Padding(
-        padding: EdgeInsets.fromLTRB(0.0, 45.0, 0.0, 0.0),
-        child: SizedBox(
-          height: 40.0,
-          child: new RaisedButton(
-            elevation: 5.0,
-            shape: new RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(30.0)),
-            color: Theme.of(context).accentColor,
-            child: new Text(_isLoginForm ? 'Anmelden' : 'Registrieren',
-                style: new TextStyle(fontSize: 20.0, color: Colors.white)),
-            onPressed: validateAndSubmit,
-          ),
-        ));
   }
 }

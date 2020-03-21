@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:delivered/pages/login_page.dart';
 import 'package:delivered/pages/main_page.dart';
+import 'package:delivered/pages/slider_page.dart';
 import 'package:delivered/services/auth.dart';
 import 'package:flutter/material.dart';
 
@@ -69,7 +70,7 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     log("UserId: " + _userId);
     if (authStatus == AuthStatus.LOGGED_IN) {
-      return new MainPage();
+      return new MainPage(auth: widget.auth);
     } else if (authStatus == AuthStatus.NOT_LOGGED_IN) {
       return new LoginPage(auth: widget.auth, loginCallback: loginCallback);
     }

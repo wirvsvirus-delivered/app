@@ -1,9 +1,13 @@
+import 'dart:developer';
+
 import 'package:delivered/pages/login_page.dart';
 import 'package:delivered/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
-  MainPage();
+  MainPage({this.auth});
+
+  Auth auth;
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -12,6 +16,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    return Placeholder();
+    widget.auth.isAccountInfoCompleted().then((value) => log(value.toString()));
+    return RaisedButton(onPressed: () => widget.auth.signOut());
   }
 }

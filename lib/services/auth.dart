@@ -1,6 +1,7 @@
 // Based on https://github.com/tattwei46/flutter_login_demo/blob/master/lib/services/authentication.dart
 
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class BaseAuth {
@@ -15,10 +16,13 @@ abstract class BaseAuth {
   Future<void> signOut();
 
   Future<bool> isEmailVerified();
+
+  Future<bool> isAccountInfoCompleted();
 }
 
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final Firestore _firestore = Firestore.instance;
 
   Future<String> signIn(String email, String password) async {
     AuthResult result = await _firebaseAuth.signInWithEmailAndPassword(
@@ -51,5 +55,16 @@ class Auth implements BaseAuth {
   Future<bool> isEmailVerified() async {
     FirebaseUser user = await _firebaseAuth.currentUser();
     return user.isEmailVerified;
+  }
+
+  Future<bool> isAccountInfoCompleted() async {
+    FirebaseUser user = await _firebaseAuth.currentUser();
+    return _firestore
+        .collection("users")
+        .document(user.uid)
+        .get()
+        .then((DocumentSnapshot ds) {
+      return ds.data["complete"];
+    });
   }
 }
