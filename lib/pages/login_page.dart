@@ -49,9 +49,19 @@ class _LoginPageState extends State<LoginPage> {
       } catch (e) {
         print('Error: $e');
         setState(() {
-          // Falsches Passwort oder sonstige Login Fehler
+          // Serverseitige Fehlermeldungen
           _isLoading = false;
-          _errorMessage = e.code;
+          if (e.code == "ERROR_USER_NOT_FOUND" ||
+              e.code == "ERROR_WRONG_PASSWORD") {
+            _errorMessage = "E-Mail oder Passwort falsch";
+          } else if (e.code == "ERROR_INVALID_EMAIL") {
+            _errorMessage = "E-Mail-Adresse ist im falschen Format";
+          } else if (e.code == "ERROR_NETWORK_REQUEST_FAILED") {
+            _errorMessage =
+                "Verbindung fehlgeschlagen. Bitte überprüfe deine Internet-Verbindung";
+          } else {
+            _errorMessage = e.message;
+          }
           // _formKey.currentState.reset();
         });
       }

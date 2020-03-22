@@ -58,6 +58,7 @@ class _RootPageState extends State<RootPage> {
       });
     });
     if (login) {
+      // Bei login nach AccountCompletion abfragen
       widget.auth.isAccountInfoCompleted().then((value) {
         setState(() {
           showAccountCompletion = !value;
@@ -65,6 +66,10 @@ class _RootPageState extends State<RootPage> {
         });
       });
     } else {
+      // Bei Registrierung nicht, da:
+      // 1. der Datenbank Eintrag für den Nutzer nicht in so kurzer Zeit erstellt werden kann
+      // 2. nach Registrierung keine Nutzerdaten vorhanden sein können
+      // Es wird immer die AccountCompletion angezeigt
       setState(() {
         showAccountCompletion = true;
         authStatus = AuthStatus.LOGGED_IN;

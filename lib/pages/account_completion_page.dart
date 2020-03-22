@@ -139,16 +139,25 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
         (value) => _zip = int.parse(value),
         15,
         zip != null,
-        zip.toString());
+        zip == null ? "" : zip.toString());
   }
 
   Widget showBirthInput(int birth) {
-    DateTime date = DateTime.fromMillisecondsSinceEpoch(birth * 1000);
+    String initalValue = "";
+    if (birth != null) {
+      DateTime initialDate = DateTime.fromMillisecondsSinceEpoch(birth * 1000);
+      initalValue = initialDate.day.toString() +
+          "." +
+          initialDate.month.toString() +
+          "." +
+          initialDate.year.toString();
+    }
     return FormUtils.buildFormField(
         InputType.DATE, 'Geburtsdatum', Icons.cake, (value) => null, (value) {
       if (value == "") {
         _birth = null;
       }
+      // Geburtsdatum in Format T.M.JJJJ in Unixzeit (in sek) umrechenen
       _birth = (DateTime(
                       int.parse(value.toString().split(".")[2]),
                       int.parse(value.toString().split(".")[1]),
@@ -156,14 +165,7 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
                   .millisecondsSinceEpoch /
               1000)
           .floor();
-    },
-        15,
-        birth != null,
-        date.day.toString() +
-            "." +
-            date.month.toString() +
-            "." +
-            date.year.toString());
+    }, 15, birth != null, initalValue);
   }
 
   Widget showButtons() {
@@ -193,6 +195,7 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
       for (String s in contains.keys) {
         if (contains[s] == null) {
           var key;
+          // Variablen Datenbank-Feldern zuordenen
           if (s == "fname") {
             key = _fistName;
           } else if (s == "lname") {
@@ -214,6 +217,9 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
       }
 
       dynamic resp = callable.call(req);
+      if(resp.data != "ok") {
+        print("Error at completeProfile: " + resp.data);
+      }
     });
   }
 }

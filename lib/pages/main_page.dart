@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:delivered/models/task.dart';
 import 'package:delivered/pages/login_page.dart';
+import 'package:delivered/pages/task_page.dart';
 import 'package:delivered/services/auth.dart';
 import 'package:delivered/services/location.dart';
 import 'package:flutter/material.dart';
@@ -29,10 +30,12 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     locationService.setup();
 
+    // Postleihzahl nach GPS abrufen
     locationService.getZipByLocation().then((value) {
       print("Zip: $value");
+      // Datenbank nach Tasks in der Nähe abfragen
       dynamic resp = callable.call({
-        "zip": [value],
+        "zip": [value, 83024],
         "over16": true,
         "over18": true
       });
@@ -41,6 +44,7 @@ class _MainPageState extends State<MainPage> {
           List<Task> tasks = [];
           print(data.data);
           for (dynamic object in data.data) {
+            // Antwort in Objekte umwandeln
             tasks.add(new Task([], false, false, false, false,
                 new Address(object["street"], "", object["zip"], "de")));
           }
@@ -74,12 +78,15 @@ class _MainPageState extends State<MainPage> {
                       List<Widget> widgets = [];
                       for (Task task in snapshot.data) {
                         widgets.add(ListTile(
-                            title: Text(task.address.street +
-                                ", " +
-                                task.address.country.toUpperCase() +
-                                "-" +
-                                task.address.zip.toString()),
-                            onTap: () => log("Tap!")));
+                            title: Text(task.address.toString()),
+                            onTap: () {
+                              // Auf Task-Unterseite weiterleiten
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => TaskPage(task: task)),
+                              );
+                            }));
                       }
                       return ListView(children: widgets);
                     }

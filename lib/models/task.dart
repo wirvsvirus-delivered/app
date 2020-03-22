@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Task {
-
-  Task(this.items, this.over16, this.over18, this.delivered, this.payed, this.address);
+  Task(this.items, this.over16, this.over18, this.delivered, this.payed,
+      this.address);
 
   List<Item> items;
   bool over16;
@@ -21,12 +21,11 @@ class Item {
 
   @override
   String toString() {
-    return amount + " "+ item + " (" + info + ")";
+    return amount + " " + item + " (" + info + ")";
   }
 }
 
 class Address {
-
   Address(this.street, this.houseNumber, this.zip, this.country);
 
   String street;
@@ -36,7 +35,11 @@ class Address {
 
   @override
   String toString() {
-    return street + " " + houseNumber + ", " + country.toUpperCase() + "-" + zip.toString();
+    return street +
+        (houseNumber == "" ? "" : " " + houseNumber) +
+        ", " +
+        country.toUpperCase() +
+        "-" +
+        zip.toString();
   }
-
 }
