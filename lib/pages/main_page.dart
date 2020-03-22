@@ -4,6 +4,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:delivered/models/task.dart';
 import 'package:delivered/pages/login_page.dart';
 import 'package:delivered/services/auth.dart';
+import 'package:delivered/services/location.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
@@ -18,6 +19,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   Future<List<Task>> _tasks;
+  LocationService locationService = new LocationService();
 
   final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
     functionName: 'userGetTasks',
@@ -25,18 +27,23 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void initState() {
-    dynamic resp = callable.call({
-      "zip": [83024, 83022],
-      "over16": true,
-      "over18": true
-    });
-    _tasks = resp.then<List<Task>>((data) {
-      List<Task> tasks = [];
-      for (dynamic object in data.data) {
-        tasks.add(new Task([], false, false, false, false,
-            new Address(object["street"], "", object["zip"], "de")));
-      }
-      return tasks;
+    locationService.setup();
+
+    locationService.getZipByLocation().then((value) {
+      print("Zip: $value");
+      dynamic resp = callable.call({
+        "zip": [value],
+        "over16": true,
+        "over18": true
+      });
+      _tasks = resp.then<List<Task>>((data) {
+        List<Task> tasks = [];
+        for (dynamic object in data.data) {
+          tasks.add(new Task([], false, false, false, false,
+              new Address(object["street"], "", object["zip"], "de")));
+        }
+        return tasks;
+      });
     });
 
     super.initState();
@@ -60,7 +67,6 @@ class _MainPageState extends State<MainPage> {
                   future: _tasks,
                   builder: (BuildContext context,
                       AsyncSnapshot<List<Task>> snapshot) {
-                    print(snapshot.data);
                     if (snapshot.hasData) {
                       List<Widget> widgets = [];
                       for (Task task in snapshot.data) {

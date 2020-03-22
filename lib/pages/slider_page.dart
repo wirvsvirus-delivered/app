@@ -24,9 +24,18 @@ class _IntoSlideShowPageState extends State<IntroSlideShowPage> {
           children: <Widget>[
             Expanded(
               child: SlideShowPage([
-                SlideShowEntry("Slide1", "Text1", Icons.done),
-                SlideShowEntry("Slide2", "Text2", Icons.directions_run),
-                SlideShowEntry("Slide3", "Text3", Icons.account_circle)
+                SlideShowEntry(
+                    "Hilfe",
+                    "Ältere Menschen, Menschen in Quarantäne oder mit Vorerkrankungen und eingeschränkte Menschen können oft nicht mehr selbst ihre Besorgen machen.",
+                    Icons.accessibility_new),
+                SlideShowEntry(
+                    "Anrufen",
+                    "Doch sie können bei delivered anrufen, wo ein ehrenamtlicher Helfer ihren Anruf entgegennimmt und als Auftrag abspeichert.",
+                    Icons.call),
+                SlideShowEntry(
+                    "App",
+                    "Die Aufträge werden in dieser App synchronisiert, wo du sie ausführst und an die Tür des Bestellers/der Bestellerin lieferst.",
+                    Icons.phone_android)
               ], () => setState(() => _buttonVisible = true)),
             ),
             SizedBox(
@@ -101,17 +110,24 @@ class SlideShowEntry extends StatelessWidget {
               color: Theme.of(context).accentColor,
               size: MediaQuery.of(context).size.width * 0.3,
             ),
-            Container(
-              padding: EdgeInsets.all(20),
-              child: Text(
-                title,
-                style: TextStyle(fontSize: 30.0),
-              ),
-            ),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 15.0,
+            Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 30.0),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 20.0),
+                    child: Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
