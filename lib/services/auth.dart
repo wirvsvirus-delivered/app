@@ -1,6 +1,7 @@
 // Based on https://github.com/tattwei46/flutter_login_demo/blob/master/lib/services/authentication.dart
 
 import 'dart:async';
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -65,6 +66,24 @@ class Auth implements BaseAuth {
         .get()
         .then((DocumentSnapshot ds) {
       return ds.data["complete"];
+    });
+  }
+
+  Future<Map<String, String>> getAccountInfoStatus() async {
+    FirebaseUser user = await _firebaseAuth.currentUser();
+    return _firestore
+        .collection("users")
+        .document(user.uid)
+        .get()
+        .then((DocumentSnapshot ds) {
+      return <String, String>{
+        "fname": ds.data["fname"],
+        "lname": ds.data["lname"],
+        "street": ds.data["street"],
+        "number": ds.data["number"],
+        "zip": ds.data["zip"],
+        "birth": ds.data["birth"],
+      };
     });
   }
 }

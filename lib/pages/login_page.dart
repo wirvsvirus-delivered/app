@@ -8,7 +8,7 @@ class LoginPage extends StatefulWidget {
   LoginPage({this.auth, this.loginCallback});
 
   final BaseAuth auth;
-  final VoidCallback loginCallback;
+  final Function loginCallback;
 
   @override
   State<StatefulWidget> createState() => new _LoginPageState();
@@ -23,19 +23,9 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isLoading;
 
-  // Check if form is valid before perform login or signup
-  bool validateAndSave() {
-    final form = _formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-    return false;
-  }
-
-  // Perform login or signup
+  // Anmelden oder Registrieren
   void validateAndSubmit(bool isLogin) async {
-    if (validateAndSave()) {
+    if (FormUtils.validateAndSave(_formKey)) {
       String userId = "";
       setState(() {
         _errorMessage = "";
@@ -47,21 +37,22 @@ class _LoginPageState extends State<LoginPage> {
           print('Signed in: $userId');
         } else {
           userId = await widget.auth.signUp(_email, _password);
-          //widget.auth.sendEmailVerification();
-          //_showVerifyEmailSentDialog();
+          widget.auth.sendEmailVerification();
+          _showVerifyEmailSentDialog();
           print('Signed up user: $userId');
         }
 
-
+        // Callback aufrufen um auf der root page die Seite zu wechseln
         if (userId.length > 0 && userId != null) {
-          widget.loginCallback();
+          widget.loginCallback(isLogin);
         }
       } catch (e) {
         print('Error: $e');
         setState(() {
+          // Falsches Passwort oder sonstige Login Fehler
           _isLoading = false;
           _errorMessage = e.code;
-          _formKey.currentState.reset();
+          // _formKey.currentState.reset();
         });
       }
     }
@@ -88,28 +79,27 @@ class _LoginPageState extends State<LoginPage> {
         body: _showForm());
   }
 
-//  void _showVerifyEmailSentDialog() {
-//    showDialog(
-//      context: context,
-//      builder: (BuildContext context) {
-//        // return object of type Dialog
-//        return AlertDialog(
-//          title: new Text("Verify your account"),
-//          content:
-//              new Text("Link to verify account has been sent to your email"),
-//          actions: <Widget>[
-//            new FlatButton(
-//              child: new Text("Dismiss"),
-//              onPressed: () {
-//                toggleFormMode();
-//                Navigator.of(context).pop();
-//              },
-//            ),
-//          ],
-//        );
-//      },
-//    );
-//  }
+  void _showVerifyEmailSentDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Verifiziere deine E-Mail-Adresse"),
+          content: new Text(
+              "Ein Link dafür sollte bereits an deine E-Mail-Adresse geschickt worden sein"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Ok"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Widget _showForm() {
     if (_isLoading) {
@@ -127,9 +117,10 @@ class _LoginPageState extends State<LoginPage> {
                 padding: new EdgeInsets.fromLTRB(0.0, 15.0, 0.0, 0.0),
                 child: Center(
                   child: Row(children: <Widget>[
-                    buildButton(
-                        false, "Registrieren", () => validateAndSubmit(false)),
-                    buildButton(true, "Anmelden", () => validateAndSubmit(true))
+                    FormUtils.buildButton(context, false, "Registrieren",
+                        () => validateAndSubmit(false)),
+                    FormUtils.buildButton(context, true, "Anmelden",
+                        () => validateAndSubmit(true))
                   ]),
                 )),
             showErrorMessage()
@@ -175,27 +166,20 @@ class _LoginPageState extends State<LoginPage> {
         Icons.mail,
         (value) => value.isEmpty ? 'E-Mail kann nicht lehr sein' : null,
         (value) => _email = value.trim(),
-        100);
+        100,
+        false,
+        "");
   }
 
   Widget showPasswordInput() {
-    return FormUtils.buildFormField(InputType.PASSWORD, 'Passwort', Icons.lock, (value) {
+    return FormUtils.buildFormField(InputType.PASSWORD, 'Passwort', Icons.lock,
+        (value) {
       if (value.isEmpty) {
         return 'Passwort kann nicht lehr sein';
-      } else if(value.toString().length < 6) {
+      } else if (value.toString().length < 6) {
         return 'Passwort zu kurz';
       }
       return null;
-    }, (value) => _password = value.trim(), 15);
-  }
-
-  Widget buildButton(bool primary, String text, Function onPress) {
-    return Expanded(
-      child: FlatButton(
-        color: primary ? Theme.of(context).accentColor : null,
-        child: new Text(text, style: Theme.of(context).textTheme.button),
-        onPressed: onPress,
-      ),
-    );
+    }, (value) => _password = value.trim(), 15, false, "");
   }
 }

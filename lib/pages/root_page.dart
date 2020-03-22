@@ -51,18 +51,25 @@ class _RootPageState extends State<RootPage> {
     );
   }
 
-  void loginCallback() {
+  void loginCallback(login) {
     widget.auth.getCurrentUser().then((user) {
       setState(() {
         _userId = user.uid.toString();
       });
     });
-    widget.auth.isAccountInfoCompleted().then((value) {
+    if (login) {
+      widget.auth.isAccountInfoCompleted().then((value) {
+        setState(() {
+          showAccountCompletion = !value;
+          authStatus = AuthStatus.LOGGED_IN;
+        });
+      });
+    } else {
       setState(() {
-        showAccountCompletion = !value;
+        showAccountCompletion = true;
         authStatus = AuthStatus.LOGGED_IN;
       });
-    });
+    }
   }
 
   void logoutCallback() {
@@ -74,10 +81,11 @@ class _RootPageState extends State<RootPage> {
 
   @override
   Widget build(BuildContext context) {
-    log("UserId: " + _userId);
     if (authStatus == AuthStatus.LOGGED_IN) {
       if (showAccountCompletion) {
-        return AccountCompletionPage();
+        return new AccountCompletionPage(
+            auth: widget.auth,
+            next: () => setState(() => showAccountCompletion = false));
       }
       return new MainPage(auth: widget.auth, logoutCallback: logoutCallback);
     } else if (authStatus == AuthStatus.NOT_LOGGED_IN) {
