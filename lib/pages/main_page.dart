@@ -36,13 +36,16 @@ class _MainPageState extends State<MainPage> {
         "over16": true,
         "over18": true
       });
-      _tasks = resp.then<List<Task>>((data) {
-        List<Task> tasks = [];
-        for (dynamic object in data.data) {
-          tasks.add(new Task([], false, false, false, false,
-              new Address(object["street"], "", object["zip"], "de")));
-        }
-        return tasks;
+      setState(() {
+        _tasks = resp.then<List<Task>>((data) {
+          List<Task> tasks = [];
+          print(data.data);
+          for (dynamic object in data.data) {
+            tasks.add(new Task([], false, false, false, false,
+                new Address(object["street"], "", object["zip"], "de")));
+          }
+          return tasks;
+        });
       });
     });
 

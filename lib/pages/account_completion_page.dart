@@ -27,12 +27,16 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
   int _zip;
   int _birth;
 
-  Future<Map<String, String>> _contains;
+  Future<Map<String, dynamic>> _contains;
 
   @override
   void initState() {
     super.initState();
-    _contains = widget.auth.getAccountInfoStatus();
+    setState(() {
+      _contains = widget.auth.getAccountInfoStatus();
+      _contains.then((value) =>
+          print("-----------------------------------------------------"));
+    });
   }
 
   @override
@@ -41,11 +45,12 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
         appBar: new AppBar(
           title: new Text("Ein letzter Schritt"),
         ),
-        body: FutureBuilder<Map<String, String>>(
+        body: FutureBuilder<Map<String, dynamic>>(
             future: _contains,
             builder: (BuildContext context,
-                AsyncSnapshot<Map<String, String>> snapshot) {
+                AsyncSnapshot<Map<String, dynamic>> snapshot) {
               if (snapshot.hasData) {
+                print(snapshot.data);
                 return new Container(
                     padding: EdgeInsets.all(16.0),
                     child: new Form(
@@ -61,7 +66,6 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
                           showButtons()
                         ])));
               }
-              print(snapshot.data);
               return Center(child: CircularProgressIndicator());
             }));
   }
@@ -124,21 +128,22 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
     );
   }
 
-  Widget showZipInput(String zip) {
+  Widget showZipInput(int zip) {
     return FormUtils.buildFormField(
         InputType.NUMBER,
         'Postleihzahl',
         Icons.location_city,
-        (value) => value.toString().length != 5 || value.toString().length != 0
+        (value) => value.toString().length != 5 && value.toString().length != 0
             ? "Eine Postleihzahl muss 5 Zeichen haben"
             : null,
         (value) => _zip = int.parse(value),
         15,
         zip != null,
-        zip);
+        zip.toString());
   }
 
-  Widget showBirthInput(String birth) {
+  Widget showBirthInput(int birth) {
+    DateTime date = DateTime.fromMillisecondsSinceEpoch(birth * 1000);
     return FormUtils.buildFormField(
         InputType.DATE, 'Geburtsdatum', Icons.cake, (value) => null, (value) {
       if (value == "") {
@@ -151,7 +156,14 @@ class _AccountCompletionPageState extends State<AccountCompletionPage> {
                   .millisecondsSinceEpoch /
               1000)
           .floor();
-    }, 15, birth != null, birth);
+    },
+        15,
+        birth != null,
+        date.day.toString() +
+            "." +
+            date.month.toString() +
+            "." +
+            date.year.toString());
   }
 
   Widget showButtons() {

@@ -69,14 +69,14 @@ class Auth implements BaseAuth {
     });
   }
 
-  Future<Map<String, String>> getAccountInfoStatus() async {
+  Future<Map<String, dynamic>> getAccountInfoStatus() async {
     FirebaseUser user = await _firebaseAuth.currentUser();
     return _firestore
         .collection("users")
         .document(user.uid)
         .get()
         .then((DocumentSnapshot ds) {
-      return <String, String>{
+      return <String, dynamic>{
         "fname": ds.data["fname"],
         "lname": ds.data["lname"],
         "street": ds.data["street"],
